@@ -1,41 +1,26 @@
-; i have tried this but i show signal time out
+; Function to calculate the size of a list
+(= (size ()) 0)
 
-(= (list-length $lst)
-   (if (== $lst ())
-       0
-       (+ 1 (list-length (rest $lst)))))
+(= (size (:: $a $bs))
+   (+ 1 (size $bs)))
 
-(= (nth-element $lst $n)
-   (if (== $n 0)
-       (head $lst)
-       (nth-element (rest $lst) (- $n 1))))
+; Function to shift the largest element to the right in a single pass
+(= (shift-to-right (:: $a())) (:: $a()))
 
-(= (append $lst $x)
-   (if (== $lst ())
-       (cons $x ())
-       (cons (head $lst) (append (rest $lst) $x))))
+(= (shift-to-right (:: $a (:: $b $tail))) (
+    if (> $a $b) (:: $b (shift-to-right (:: $a $tail))) (:: $a (shift-to-right (:: $b $tail)))
+    )
+)
 
-(= (concat $lst1 $lst2)
-   (if (== $lst1 ())
-       $lst2
-       (cons (head $lst1) (concat (rest $lst1) $lst2))))
+; Repeatedly applies the shift-to-right process to fully sort the list
+(= (repeat-shift $count $list) 
+    (if (> $count 0) (repeat-shift (- $count 1) (shift-to-right $list)) ($list))
+)
 
-(= (partition $lst $pivot)
-   (if (== $lst ())
-       (cons () ())
-       (if (< (head $lst) $pivot)
-           (let $part (partition (rest $lst) $pivot)
-               (cons (cons (head $lst) (head $part))
-                     (nth-element $part 1)))
-           (let $part (partition (rest $lst) $pivot)
-               (cons (head $part)
-                     (cons (head $lst) (nth-element $part 1)))))))
+; Main function to sort the list
+(= (arrange $list)
+    (repeat-shift (size $list) $list)
+)
 
-(= (sort-list $lst)
-   (if (== $lst ())
-       ()
-       (concat (sort-list (head (partition (rest $lst) (head $lst))))
-               (cons (head $lst) ())
-               (sort-list (head (partition (rest $lst) (head $lst)))))))
-
-!(sort-list (cons 7 (cons 3 (cons 10 (cons 2 (cons 8 ()))))))
+; Test case to check if the sorting works
+!(arrange (:: 13(:: 3(:: 2(:: 1(:: 0(:: 11()))))))); 
